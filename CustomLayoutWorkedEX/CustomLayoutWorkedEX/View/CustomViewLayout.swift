@@ -21,7 +21,7 @@ class CustomViewLayout: UICollectionViewLayout {
     }
     
     weak var delegate: CustomLayoutDelegate?
-    var rootEmptyAttributes = CustomLayoutAttributes(forCellWith: IndexPath(item: -1, section: -1))
+    
     var layoutInformation: [String: [IndexPath: UICollectionViewLayoutAttributes]] = [:]
     var maxNumRows: Int = 0
     var insets: UIEdgeInsets = .zero
@@ -99,6 +99,32 @@ class CustomViewLayout: UICollectionViewLayout {
         return CGSize(width: width, height: height)
     }
     
+    override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
+        var myAttributes = [UICollectionViewLayoutAttributes]()
+        
+        for (_, attributesInfo) in self.layoutInformation {
+            for (_ , attributes) in attributesInfo {
+                if rect.intersects(attributes.frame) {
+                    myAttributes.append(attributes)
+                }
+            }
+        }
+        
+        return myAttributes
+    }
+    
+    override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
+        return self.layoutInformation["Cell"]?[indexPath]
+    }
+    
+    override func layoutAttributesForSupplementaryView(ofKind elementKind: String, at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
+        return self.layoutInformation[elementKind]?[indexPath]
+    }
+   
+}
+
+// MARK :-  Private Functions
+extension CustomViewLayout {
     private func attributesWithChildren(for indexPath: IndexPath, with information: [IndexPath: CustomLayoutAttributes]) -> CustomLayoutAttributes {
         let attributes = CustomLayoutAttributes(forCellWith: indexPath)
         guard let delegate = self.delegate,
@@ -134,25 +160,6 @@ class CustomViewLayout: UICollectionViewLayout {
         }
     }
     
-    override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
-        var myAttributes = [UICollectionViewLayoutAttributes]()
-        
-        for (_, attributesInfo) in self.layoutInformation {
-            for (_ , attributes) in attributesInfo {
-                if rect.intersects(attributes.frame) {
-                    myAttributes.append(attributes)
-                }
-            }
-        }
-        
-        return myAttributes
-    }
-    
-    override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
-        return self.layoutInformation["Cell"]?[indexPath]
-    }
-    
-   
     private func frameForCell(at indexPath: IndexPath, with totalRows: Int) -> CGRect {
         
         let x = insets.left + CGFloat(indexPath.section) * (insets.left + insets.right + ITEM_WIDTH)

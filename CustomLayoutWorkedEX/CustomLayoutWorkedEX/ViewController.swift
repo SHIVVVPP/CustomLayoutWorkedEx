@@ -131,7 +131,7 @@ extension ViewController: UICollectionViewDataSource {
             var numberOfRowsInChildren = [Int]()
             
             for child in item.children {
-                numberOfRowsInChildren.append(numberOfChilds(at: child))
+                numberOfRowsInChildren.append(numberOfChildren(at: child))
             }
             view.configure(with: numberOfRowsInChildren)
             
@@ -147,14 +147,14 @@ extension ViewController: CustomLayoutDelegate {
               datasource[indexPath.section].count > indexPath.row
         else {return 0}
         
-        return numberOfChilds(at: datasource[indexPath.section][indexPath.row])
+        return numberOfChildren(at: datasource[indexPath.section][indexPath.row])
     }
     
-    private func numberOfChilds(at item: ClassObject) -> Int {
+    private func numberOfChildren(at item: ClassObject) -> Int {
         guard !item.children.isEmpty else { return 1 }
         var totalNum = 0
         for child in item.children {
-            totalNum += numberOfChilds(at: child)
+            totalNum += numberOfChildren(at: child)
         }
         
         return totalNum
